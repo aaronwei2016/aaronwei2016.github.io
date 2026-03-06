@@ -3,153 +3,141 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aaron Wei | Personal Website</title>
+<title>Aaron Wei | Mini Comic Maker</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f0f4f8;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-  }
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f4f8;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
 
-  header {
-    background-color: #4CAF50;
-    color: white;
-    padding: 15px;
-  }
+header {
+  background-color: #4CAF50;
+  color: white;
+  padding: 15px;
+}
 
-  nav a {
-    color: white;
-    margin: 0 10px;
-    text-decoration: none;
-    font-weight: bold;
-    cursor: pointer;
-  }
+nav a {
+  color: white;
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-  nav a:hover {
-    text-decoration: underline;
-  }
+nav a:hover {
+  text-decoration: underline;
+}
 
-  main {
-    padding: 20px;
-  }
+main {
+  padding: 20px;
+}
 
-  section {
-    display: none;
-  }
+section {
+  display: none;
+}
 
-  section.active {
-    display: block;
-  }
+section.active {
+  display: block;
+}
 
-  footer {
-    background-color: #222;
-    color: white;
-    padding: 10px;
-  }
+footer {
+  background-color: #222;
+  color: white;
+  padding: 10px;
+}
 
-  /* Mini comic maker styles */
-  #comic-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-  }
+/* Mini Comic Maker Styles */
+#comic-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
 
-  .panel {
-    width: 200px;
-    height: 200px;
-    background: white;
-    border: 2px solid #333;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+.panel {
+  width: 300px;
+  height: 300px;
+  background: white;
+  border: 2px solid #333;
+  position: relative;
+  overflow: hidden;
+}
 
-  .speech {
-    position: absolute;
-    background: yellow;
-    padding: 5px;
-    border-radius: 10px;
-    max-width: 180px;
-    cursor: move;
-  }
+.speech, .comic-image {
+  position: absolute;
+  cursor: grab;
+}
 
-  button {
-    margin: 5px;
-    padding: 10px 15px;
-    cursor: pointer;
-  }
+.speech {
+  background: yellow;
+  padding: 5px;
+  border-radius: 10px;
+  max-width: 280px;
+}
 
-  #toolbar {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 10px;
-  }
+button {
+  margin: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+#toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+#characters img {
+  width: 50px;
+  height: 50px;
+  margin: 3px;
+  cursor: grab;
+  border: 2px solid transparent;
+}
+
+#characters img:hover {
+  border-color: #4CAF50;
+}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Aaron Wei</h1>
+  <h1>Aaron Wei | Mini Comic Maker</h1>
   <nav>
-    <a onclick="showSection('home')">Home</a> |
-    <a onclick="showSection('about')">About Me</a> |
-    <a onclick="showSection('projects')">Projects</a> |
     <a onclick="showSection('comic')">Mini Comic Maker</a>
   </nav>
 </header>
 
 <main>
-  <!-- Home Section -->
-  <section id="home" class="active">
-    <h2>Welcome!</h2>
-    <p>Hello! I’m Aaron. I love coding games, making comics, and experimenting with fun projects. Explore my site to see my creations!</p>
-    <img src="https://via.placeholder.com/150" alt="Aaron Wei" width="150">
-  </section>
-
-  <!-- About Me Section -->
-  <section id="about">
-    <h2>About Me</h2>
-    <p>I’m a teen coder and gamer. I enjoy building Roblox games, creating mini comic tools, and learning new programming tricks!</p>
-    <ul>
-      <li>Hobbies: Coding, comics, games</li>
-      <li>Favorite games: Roblox, Minecraft</li>
-      <li>Goal: Make fun interactive websites</li>
-    </ul>
-  </section>
-
-  <!-- Projects Section -->
-  <section id="projects">
-    <h2>My Projects</h2>
-    <ul>
-      <li><strong>Block Fruits</strong> – A fun Python game to fight enemies and collect fruits.</li>
-      <li><strong>Kirby Clicker</strong> – Click to level up Kirby and unlock seasons!</li>
-      <li><strong>RacingType</strong> – Type fast to earn money and buy cars.</li>
-    </ul>
-  </section>
-
-  <!-- Mini Comic Maker Section -->
-  <section id="comic">
-    <h2>Mini Comic Maker</h2>
-    <div id="toolbar">
-      <button onclick="addPanel()">Add Panel</button>
-      <button onclick="addSpeech()">Add Speech Bubble</button>
-      <button onclick="clearPanels()">Clear All</button>
-    </div>
-    <div id="comic-container"></div>
-  </section>
+<section id="comic" class="active">
+  <h2>Mini Comic Maker</h2>
+  <div id="toolbar">
+    <button onclick="addPanel()">Add Panel</button>
+    <button onclick="addSpeech()">Add Speech Bubble</button>
+    <button onclick="clearPanels()">Clear All</button>
+  </div>
+  <div id="characters">
+    <img src="https://via.placeholder.com/50x50/FF0000/FFFFFF?text=A" alt="Character A" draggable="true">
+    <img src="https://via.placeholder.com/50x50/00FF00/FFFFFF?text=B" alt="Character B" draggable="true">
+    <img src="https://via.placeholder.com/50x50/0000FF/FFFFFF?text=C" alt="Character C" draggable="true">
+  </div>
+  <div id="comic-container"></div>
+  <button onclick="downloadPanels()">Download All Panels</button>
+</section>
 </main>
 
 <footer>
   <p>© 2026 Aaron Wei | <a href="https://github.com/aaronwei2016" style="color:white;">GitHub</a></p>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
   // Navigation
   function showSection(id) {
@@ -157,7 +145,7 @@
     document.getElementById(id).classList.add('active');
   }
 
-  // Mini Comic Maker
+  // Comic Maker
   let panelCount = 0;
 
   function addPanel() {
@@ -171,46 +159,88 @@
 
   function addSpeech() {
     const panels = document.getElementsByClassName('panel');
-    if (panels.length === 0) {
-      alert("Add a panel first!");
-      return;
-    }
-
+    if (!panels.length) return alert("Add a panel first!");
+    
     const speech = document.createElement('div');
     speech.className = 'speech';
     speech.contentEditable = true;
     speech.innerText = "Type here...";
-
-    // Draggable speech
-    speech.onmousedown = function(event) {
-      let shiftX = event.clientX - speech.getBoundingClientRect().left;
-      let shiftY = event.clientY - speech.getBoundingClientRect().top;
-
-      function moveAt(pageX, pageY) {
-        speech.style.left = pageX - shiftX - panels[0].getBoundingClientRect().left + "px";
-        speech.style.top = pageY - shiftY - panels[0].getBoundingClientRect().top + "px";
-      }
-
-      function onMouseMove(event) {
-        moveAt(event.pageX, event.pageY);
-      }
-
-      document.addEventListener('mousemove', onMouseMove);
-
-      speech.onmouseup = function() {
-        document.removeEventListener('mousemove', onMouseMove);
-        speech.onmouseup = null;
-      };
-    };
-
-    speech.ondragstart = () => false;
-
-    panels[panels.length - 1].appendChild(speech);
+    speech.style.left = "10px";
+    speech.style.top = "10px";
+    makeDraggable(speech, panels[panels.length-1]);
+    panels[panels.length-1].appendChild(speech);
   }
 
   function clearPanels() {
     document.getElementById('comic-container').innerHTML = '';
     panelCount = 0;
+  }
+
+  // Dragging logic for speech and images
+  function makeDraggable(el, container) {
+    el.onmousedown = function(e) {
+      e.preventDefault();
+      let shiftX = e.clientX - el.getBoundingClientRect().left;
+      let shiftY = e.clientY - el.getBoundingClientRect().top;
+
+      function moveAt(pageX, pageY) {
+        let newX = pageX - shiftX - container.getBoundingClientRect().left;
+        let newY = pageY - shiftY - container.getBoundingClientRect().top;
+        // Keep inside panel
+        newX = Math.max(0, Math.min(container.clientWidth - el.offsetWidth, newX));
+        newY = Math.max(0, Math.min(container.clientHeight - el.offsetHeight, newY));
+        el.style.left = newX + 'px';
+        el.style.top = newY + 'px';
+      }
+
+      function onMouseMove(e) { moveAt(e.pageX, e.pageY); }
+      document.addEventListener('mousemove', onMouseMove);
+      el.onmouseup = function() {
+        document.removeEventListener('mousemove', onMouseMove);
+        el.onmouseup = null;
+      };
+    };
+    el.ondragstart = () => false;
+  }
+
+  // Character dragging
+  document.querySelectorAll('#characters img').forEach(img => {
+    img.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', e.target.src);
+    });
+  });
+
+  document.getElementById('comic-container').addEventListener('dragover', e => {
+    e.preventDefault();
+  });
+
+  document.getElementById('comic-container').addEventListener('drop', e => {
+    e.preventDefault();
+    const src = e.dataTransfer.getData('text/plain');
+    const panel = e.target.closest('.panel');
+    if (!panel) return;
+    const img = document.createElement('img');
+    img.src = src;
+    img.className = 'comic-image';
+    img.style.width = '80px';
+    img.style.height = '80px';
+    img.style.left = (e.offsetX - 40) + 'px';
+    img.style.top = (e.offsetY - 40) + 'px';
+    makeDraggable(img, panel);
+    panel.appendChild(img);
+  });
+
+  // Download panels
+  function downloadPanels() {
+    const panels = document.querySelectorAll('.panel');
+    panels.forEach((panel, i) => {
+      html2canvas(panel).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'panel-' + i + '.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    });
   }
 </script>
 
