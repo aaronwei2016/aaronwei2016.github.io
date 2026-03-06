@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Comic Maker - Full</title>
+<title>Mini Comic Maker - Play Mode</title>
 <style>
 body { font-family: Arial, sans-serif; background:#f0f4f8; text-align:center; margin:0; }
 header { background:#4CAF50; color:white; padding:15px; }
@@ -235,18 +235,22 @@ function downloadPanels(){
 async function playComic(){
     const panels = Array.from(document.querySelectorAll('.panel'));
     if(panels.length===0) return;
-    panels.forEach(p=>p.style.display='none'); // hide all
+    // Hide all panels first
+    panels.forEach(p=>p.style.display='none');
     for(let p of panels){
         p.style.display='block';
         const bubbles = Array.from(p.querySelectorAll('.speech'));
         bubbles.forEach(b=>b.style.visibility='hidden');
         for(let b of bubbles){
             b.style.visibility='visible';
-            await new Promise(r=>setTimeout(r, 1000)); // 1 sec per bubble
+            await new Promise(r=>setTimeout(r, 1000)); // 1 second per speech bubble
         }
-        await new Promise(r=>setTimeout(r, 500)); // pause between panels
+        await new Promise(r=>setTimeout(r, 500)); // short pause between panels
+        // optionally keep panel visible or hide after reading
+        // p.style.display='none';
     }
-    panels.forEach(p=>p.style.display='block'); // show all at end
+    // show all panels again
+    panels.forEach(p=>p.style.display='block');
 }
 </script>
 </body>
