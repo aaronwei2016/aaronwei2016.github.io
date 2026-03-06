@@ -1,17 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Personal Website</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f0f0f0; text-align: center; padding: 50px; }
-    h1 { color: #333; }
-    p { color: #555; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aaron Wei | Personal Website</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+
+  header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px;
+  }
+
+  nav a {
+    color: white;
+    margin: 0 10px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  nav a:hover {
+    text-decoration: underline;
+  }
+
+  main {
+    padding: 20px;
+  }
+
+  section {
+    display: none;
+  }
+
+  section.active {
+    display: block;
+  }
+
+  footer {
+    background-color: #222;
+    color: white;
+    padding: 10px;
+  }
+
+  /* Mini comic maker styles */
+  #comic-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .panel {
+    width: 200px;
+    height: 200px;
+    background: white;
+    border: 2px solid #333;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .speech {
+    position: absolute;
+    background: yellow;
+    padding: 5px;
+    border-radius: 10px;
+    max-width: 180px;
+    cursor: move;
+  }
+
+  button {
+    margin: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+  }
+
+  #toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 10px;
+  }
+</style>
 </head>
 <body>
-  <h1>Hello! I’m Aaron.</h1>
-  <p>Welcome to my personal website.</p>
+
+<header>
+  <h1>Aaron Wei</h1>
+  <nav>
+    <a onclick="showSection('home')">Home</a> |
+    <a onclick="showSection('about')">About Me</a> |
+    <a onclick="showSection('projects')">Projects</a> |
+    <a onclick="showSection('comic')">Mini Comic Maker</a>
+  </nav>
+</header>
+
+<main>
+  <!-- Home Section -->
+  <section id="home" class="active">
+    <h2>Welcome!</h2>
+    <p>Hello! I’m Aaron. I love coding games, making comics, and experimenting with fun projects. Explore my site to see my creations!</p>
+    <img src="https://via.placeholder.com/150" alt="Aaron Wei" width="150">
+  </section>
+
+  <!-- About Me Section -->
+  <section id="about">
+    <h2>About Me</h2>
+    <p>I’m a teen coder and gamer. I enjoy building Roblox games, creating mini comic tools, and learning new programming tricks!</p>
+    <ul>
+      <li>Hobbies: Coding, comics, games</li>
+      <li>Favorite games: Roblox, Minecraft</li>
+      <li>Goal: Make fun interactive websites</li>
+    </ul>
+  </section>
+
+  <!-- Projects Section -->
+  <section id="projects">
+    <h2>My Projects</h2>
+    <ul>
+      <li><strong>Block Fruits</strong> – A fun Python game to fight enemies and collect fruits.</li>
+      <li><strong>Kirby Clicker</strong> – Click to level up Kirby and unlock seasons!</li>
+      <li><strong>RacingType</strong> – Type fast to earn money and buy cars.</li>
+    </ul>
+  </section>
+
+  <!-- Mini Comic Maker Section -->
+  <section id="comic">
+    <h2>Mini Comic Maker</h2>
+    <div id="toolbar">
+      <button onclick="addPanel()">Add Panel</button>
+      <button onclick="addSpeech()">Add Speech Bubble</button>
+      <button onclick="clearPanels()">Clear All</button>
+    </div>
+    <div id="comic-container"></div>
+  </section>
+</main>
+
+<footer>
+  <p>© 2026 Aaron Wei | <a href="https://github.com/aaronwei2016" style="color:white;">GitHub</a></p>
+</footer>
+
+<script>
+  // Navigation
+  function showSection(id) {
+    document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // Mini Comic Maker
+  let panelCount = 0;
+
+  function addPanel() {
+    const container = document.getElementById('comic-container');
+    const panel = document.createElement('div');
+    panel.className = 'panel';
+    panel.id = 'panel-' + panelCount;
+    panelCount++;
+    container.appendChild(panel);
+  }
+
+  function addSpeech() {
+    const panels = document.getElementsByClassName('panel');
+    if (panels.length === 0) {
+      alert("Add a panel first!");
+      return;
+    }
+
+    const speech = document.createElement('div');
+    speech.className = 'speech';
+    speech.contentEditable = true;
+    speech.innerText = "Type here...";
+
+    // Draggable speech
+    speech.onmousedown = function(event) {
+      let shiftX = event.clientX - speech.getBoundingClientRect().left;
+      let shiftY = event.clientY - speech.getBoundingClientRect().top;
+
+      function moveAt(pageX, pageY) {
+        speech.style.left = pageX - shiftX - panels[0].getBoundingClientRect().left + "px";
+        speech.style.top = pageY - shiftY - panels[0].getBoundingClientRect().top + "px";
+      }
+
+      function onMouseMove(event) {
+        moveAt(event.pageX, event.pageY);
+      }
+
+      document.addEventListener('mousemove', onMouseMove);
+
+      speech.onmouseup = function() {
+        document.removeEventListener('mousemove', onMouseMove);
+        speech.onmouseup = null;
+      };
+    };
+
+    speech.ondragstart = () => false;
+
+    panels[panels.length - 1].appendChild(speech);
+  }
+
+  function clearPanels() {
+    document.getElementById('comic-container').innerHTML = '';
+    panelCount = 0;
+  }
+</script>
+
 </body>
 </html>
