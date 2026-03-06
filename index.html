@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Comic Maker - Hover Outline</title>
+<title>Mini Comic Maker - Hover & Editable Speech</title>
 <style>
 body { font-family: Arial, sans-serif; background:#f0f4f8; text-align:center; margin:0; }
 header { background:#4CAF50; color:white; padding:15px; }
@@ -13,10 +13,10 @@ header { background:#4CAF50; color:white; padding:15px; }
 .panel.selected { border:4px solid #FF5722; }
 .panel-bg { position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; background-size:cover; background-position:center; }
 .panel-content { position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; }
-.speech, .comic-image { position:absolute; cursor:grab; user-select:none; }
-.speech { background:yellow; padding:5px; border-radius:10px; max-width:280px; z-index:20; }
-.comic-image { z-index:10; transition: outline 0.1s; }
-.comic-image.hovered { outline: 3px solid orange; }
+.speech, .comic-image { position:absolute; user-select:none; }
+.speech { background:yellow; padding:5px; border-radius:10px; max-width:280px; z-index:20; cursor:text; }
+.comic-image { z-index:10; cursor:grab; transition: outline 0.1s; }
+.comic-image.hovered, .speech.hovered { outline: 3px solid orange; }
 .resizer { width:10px; height:10px; background:#4CAF50; position:absolute; right:0; bottom:0; cursor:se-resize; z-index:25; }
 .rotator { width:10px; height:10px; background:#FF5722; position:absolute; right:0; top:0; cursor:grab; z-index:25; }
 input[type=file] { margin-top:5px; }
@@ -104,7 +104,7 @@ function addSpeech(){
     bubble.innerText='Type here...';
     bubble.style.left='10px'; bubble.style.top='10px';
     selectedPanel.querySelector('.panel-content').appendChild(bubble);
-    makeDraggable(bubble, selectedPanel.querySelector('.panel-content'), false);
+    makeDraggable(bubble, selectedPanel.querySelector('.panel-content'), false, true);
 }
 
 // Upload Character/Image
@@ -121,12 +121,10 @@ document.getElementById('uploadImage').addEventListener('change', e=>{
         img.style.left='10px';
         img.style.top='10px';
         selectedPanel.querySelector('.panel-content').appendChild(img);
-        makeDraggable(img, selectedPanel.querySelector('.panel-content'), true);
+        makeDraggable(img, selectedPanel.querySelector('.panel-content'), true, false);
 
-        // Keep selected
         selectedPanel.classList.add('selected');
         document.getElementById('selected-panel').innerText = selectedPanel.id;
-
         e.target.value="";
     };
     reader.readAsDataURL(file);
@@ -140,17 +138,16 @@ document.getElementById('uploadBg').addEventListener('change', e=>{
     reader.onload=function(ev){
         selectedPanel.querySelector('.panel-bg').style.backgroundImage=`url(${ev.target.result})`;
 
-        // Keep selected
         selectedPanel.classList.add('selected');
         document.getElementById('selected-panel').innerText = selectedPanel.id;
-
         e.target.value="";
     };
     reader.readAsDataURL(file);
 });
 
-// Drag, Resize, Rotate with hover outline
-function makeDraggable(el, container, allowRotation=true){
+// Drag, Resize, Rotate
+// editableBubble=true skips drag prevention so you can type
+function makeDraggable(el, container, allowRotation=true, editableBubble=false){
     // Hover highlight
     el.addEventListener('mouseenter', () => {
         if(selectedPanel && selectedPanel.contains(el)) el.classList.add('hovered');
@@ -159,34 +156,35 @@ function makeDraggable(el, container, allowRotation=true){
         el.classList.remove('hovered');
     });
 
-    let offsetX, offsetY, startX, startY;
-    el.onmousedown=function(e){
-        if(e.target.classList.contains('resizer') || e.target.classList.contains('rotator')) return;
-        e.preventDefault();
+    if(!editableBubble){
+        let offsetX, offsetY, startX, startY;
+        el.onmousedown=function(e){
+            if(e.target.classList.contains('resizer') || e.target.classList.contains('rotator')) return;
+            e.preventDefault();
 
-        // Keep outline while dragging
-        el.classList.add('hovered');
+            el.classList.add('hovered');
 
-        startX=e.clientX; startY=e.clientY;
-        offsetX=parseFloat(el.style.left)||0;
-        offsetY=parseFloat(el.style.top)||0;
-        function move(e){
-            let dx=e.clientX-startX;
-            let dy=e.clientY-startY;
-            let newX=Math.min(Math.max(offsetX+dx,0),container.clientWidth-el.offsetWidth);
-            let newY=Math.min(Math.max(offsetY+dy,0),container.clientHeight-el.offsetHeight);
-            el.style.left=newX+'px';
-            el.style.top=newY+'px';
-        }
-        function stop(){
-            document.removeEventListener('mousemove',move);
-            document.removeEventListener('mouseup',stop);
-            el.classList.remove('hovered'); // remove after drag
-        }
-        document.addEventListener('mousemove',move);
-        document.addEventListener('mouseup',stop);
-    };
-    el.ondragstart=()=>false;
+            startX=e.clientX; startY=e.clientY;
+            offsetX=parseFloat(el.style.left)||0;
+            offsetY=parseFloat(el.style.top)||0;
+            function move(e){
+                let dx=e.clientX-startX;
+                let dy=e.clientY-startY;
+                let newX=Math.min(Math.max(offsetX+dx,0),container.clientWidth-el.offsetWidth);
+                let newY=Math.min(Math.max(offsetY+dy,0),container.clientHeight-el.offsetHeight);
+                el.style.left=newX+'px';
+                el.style.top=newY+'px';
+            }
+            function stop(){
+                document.removeEventListener('mousemove',move);
+                document.removeEventListener('mouseup',stop);
+                el.classList.remove('hovered');
+            }
+            document.addEventListener('mousemove',move);
+            document.addEventListener('mouseup',stop);
+        };
+        el.ondragstart=()=>false;
+    }
 
     if(allowRotation){
         const resizer=document.createElement('div'); resizer.className='resizer';
