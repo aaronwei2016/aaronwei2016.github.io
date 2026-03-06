@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Comic Maker</title>
+<title>Mini Comic Maker - TTS Comic</title>
 <style>
 body { font-family: Arial, sans-serif; background:#f0f4f8; text-align:center; margin:0; }
 header { background:#4CAF50; color:white; padding:15px; }
@@ -25,6 +25,7 @@ header { background:#4CAF50; color:white; padding:15px; }
 .rotator { width:10px; height:10px; background:#FF5722; position:absolute; right:0; top:0; cursor:grab; z-index:26; }
 input[type=file] { margin-top:5px; }
 #selected-panel { font-weight:bold; margin-left:10px; }
+.highlight { outline:3px solid orange !important; }
 </style>
 </head>
 <body>
@@ -36,7 +37,7 @@ input[type=file] { margin-top:5px; }
   <button onclick="addSpeech()">Add Speech Bubble</button>
   <button onclick="clearPanels()">Clear All Panels</button>
   <button onclick="downloadPanels()">Download All Panels</button>
-  <button onclick="playComic()">Play Comic</button>
+  <button onclick="playComicTTS()">Play Comic (TTS)</button>
   <div>
     <label>Selected Panel: <span id="selected-panel">None</span></label>
   </div>
@@ -57,7 +58,7 @@ input[type=file] { margin-top:5px; }
 let panelCount=0;
 let selectedPanel=null;
 
-// Add Panel
+// PANEL FUNCTIONS
 function addPanel(){
     const container=document.getElementById('comic-container');
     const panel=document.createElement('div');
@@ -82,7 +83,6 @@ function addPanel(){
     panelCount++;
 }
 
-// Select Panel
 function selectPanel(panel){
     document.querySelectorAll('.panel').forEach(p=>p.classList.remove('selected'));
     panel.classList.add('selected');
@@ -90,7 +90,6 @@ function selectPanel(panel){
     document.getElementById('selected-panel').innerText=panel.id;
 }
 
-// Deselect if clicked outside
 document.addEventListener('click', e=>{
     const toolbar = document.getElementById('toolbar');
     if(!e.target.classList.contains('panel') && !toolbar.contains(e.target)){
@@ -100,7 +99,7 @@ document.addEventListener('click', e=>{
     }
 });
 
-// Add Speech Bubble
+// SPEECH BUBBLES
 function addSpeech(){
     if(!selectedPanel) return alert("Select a panel first!");
     const bubble=document.createElement('div');
@@ -112,7 +111,7 @@ function addSpeech(){
     makeDraggableResizable(bubble, selectedPanel.querySelector('.panel-content'), false, true);
 }
 
-// Upload Image
+// IMAGE UPLOAD
 document.getElementById('uploadImage').addEventListener('change', e=>{
     if(!selectedPanel) return alert("Select a panel first!");
     const file=e.target.files[0]; if(!file) return;
@@ -134,7 +133,7 @@ document.getElementById('uploadImage').addEventListener('change', e=>{
     reader.readAsDataURL(file);
 });
 
-// Upload Background
+// BACKGROUND UPLOAD
 document.getElementById('uploadBg').addEventListener('change', e=>{
     if(!selectedPanel) return alert("Select a panel first!");
     const file=e.target.files[0]; if(!file) return;
@@ -148,7 +147,7 @@ document.getElementById('uploadBg').addEventListener('change', e=>{
     reader.readAsDataURL(file);
 });
 
-// Draggable + 4-corner Resizable
+// DRAG, RESIZE, ROTATE
 function makeDraggableResizable(el, container, allowRotation=true, editableBubble=false){
     el.addEventListener('mouseenter',()=>{ if(selectedPanel && selectedPanel.contains(el)) el.classList.add('hovered'); });
     el.addEventListener('mouseleave',()=>{ el.classList.remove('hovered'); });
@@ -215,10 +214,9 @@ function makeDraggableResizable(el, container, allowRotation=true, editableBubbl
     }
 }
 
-// Clear Panels
+// CLEAR & DOWNLOAD
 function clearPanels(){document.getElementById('comic-container').innerHTML=''; panelCount=0; selectedPanel=null; document.getElementById('selected-panel').innerText='None';}
 
-// Download Panels
 function downloadPanels(){
     const panels=document.querySelectorAll('.panel');
     panels.forEach((panel,i)=>{
@@ -231,26 +229,48 @@ function downloadPanels(){
     });
 }
 
-// Play Comic
-async function playComic(){
+// PLAY COMIC WITH TTS & HIGHLIGHT
+async function playComicTTS(){
     const panels = Array.from(document.querySelectorAll('.panel'));
     if(panels.length===0) return;
-    // Hide all panels first
+
     panels.forEach(p=>p.style.display='none');
+    await waitVoices(); // ensure voices loaded
+
     for(let p of panels){
         p.style.display='block';
         const bubbles = Array.from(p.querySelectorAll('.speech'));
         bubbles.forEach(b=>b.style.visibility='hidden');
+
         for(let b of bubbles){
             b.style.visibility='visible';
-            await new Promise(r=>setTimeout(r, 1000)); // 1 second per speech bubble
+            b.classList.add('highlight');
+            await speakText(b.innerText);
+            b.classList.remove('highlight');
         }
-        await new Promise(r=>setTimeout(r, 500)); // short pause between panels
-        // optionally keep panel visible or hide after reading
-        // p.style.display='none';
+        await sleep(300); // short pause between panels
     }
-    // show all panels again
     panels.forEach(p=>p.style.display='block');
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+function waitVoices(){ 
+    return new Promise(resolve=>{
+        let voices = speechSynthesis.getVoices();
+        if(voices.length>0) return resolve();
+        speechSynthesis.onvoiceschanged = ()=>resolve();
+    });
+}
+
+function speakText(text){
+    return new Promise(resolve=>{
+        const utter = new SpeechSynthesisUtterance(text);
+        const voices = speechSynthesis.getVoices();
+        if(voices.length>0) utter.voice=voices[0];
+        utter.onend = resolve;
+        speechSynthesis.speak(utter);
+    });
 }
 </script>
 </body>
