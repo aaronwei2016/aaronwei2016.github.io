@@ -5,243 +5,217 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aaron Wei | Mini Comic Maker</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f0f4f8;
-  margin: 0;
-  padding: 0;
-  text-align: center;
-}
-
-header {
-  background-color: #4CAF50;
-  color: white;
-  padding: 15px;
-}
-
-nav a {
-  color: white;
-  margin: 0 10px;
-  text-decoration: none;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-nav a:hover {
-  text-decoration: underline;
-}
-
-main {
-  padding: 20px;
-}
-
-section {
-  display: none;
-}
-
-section.active {
-  display: block;
-}
-
-footer {
-  background-color: #222;
-  color: white;
-  padding: 10px;
-}
-
-/* Mini Comic Maker Styles */
-#comic-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.panel {
-  width: 300px;
-  height: 300px;
-  background: white;
-  border: 2px solid #333;
-  position: relative;
-  overflow: hidden;
-}
-
-.speech, .comic-image {
-  position: absolute;
-  cursor: grab;
-}
-
-.speech {
-  background: yellow;
-  padding: 5px;
-  border-radius: 10px;
-  max-width: 280px;
-}
-
-button {
-  margin: 5px;
-  padding: 10px 15px;
-  cursor: pointer;
-}
-
-#toolbar {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-#characters img {
-  width: 50px;
-  height: 50px;
-  margin: 3px;
-  cursor: grab;
-  border: 2px solid transparent;
-}
-
-#characters img:hover {
-  border-color: #4CAF50;
-}
+body { font-family: Arial, sans-serif; background: #f0f4f8; margin: 0; padding: 0; text-align: center; }
+header { background-color: #4CAF50; color: white; padding: 15px; }
+nav a { color: white; margin: 0 10px; text-decoration: none; font-weight: bold; cursor: pointer; }
+nav a:hover { text-decoration: underline; }
+main { padding: 20px; }
+section { display: none; }
+section.active { display: block; }
+footer { background-color: #222; color: white; padding: 10px; }
+#comic-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+.panel { width: 300px; height: 300px; background: white; border: 2px solid #333; position: relative; overflow: hidden; }
+.speech, .comic-image { position: absolute; cursor: grab; }
+.speech { background: yellow; padding: 5px; border-radius: 10px; max-width: 280px; }
+#toolbar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+#characters img { width: 50px; height: 50px; margin: 3px; cursor: grab; border: 2px solid transparent; }
+#characters img:hover { border-color: #4CAF50; }
+input[type=file] { margin-top: 10px; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Aaron Wei | Mini Comic Maker</h1>
-  <nav>
-    <a onclick="showSection('comic')">Mini Comic Maker</a>
-  </nav>
+<h1>Aaron Wei | Mini Comic Maker</h1>
+<nav><a onclick="showSection('comic')">Mini Comic Maker</a></nav>
 </header>
 
 <main>
 <section id="comic" class="active">
-  <h2>Mini Comic Maker</h2>
-  <div id="toolbar">
-    <button onclick="addPanel()">Add Panel</button>
-    <button onclick="addSpeech()">Add Speech Bubble</button>
-    <button onclick="clearPanels()">Clear All</button>
-  </div>
-  <div id="characters">
-    <img src="https://via.placeholder.com/50x50/FF0000/FFFFFF?text=A" alt="Character A" draggable="true">
-    <img src="https://via.placeholder.com/50x50/00FF00/FFFFFF?text=B" alt="Character B" draggable="true">
-    <img src="https://via.placeholder.com/50x50/0000FF/FFFFFF?text=C" alt="Character C" draggable="true">
-  </div>
-  <div id="comic-container"></div>
-  <button onclick="downloadPanels()">Download All Panels</button>
+<h2>Mini Comic Maker</h2>
+<div id="toolbar">
+<button onclick="addPanel()">Add Panel</button>
+<button onclick="addSpeech()">Add Speech Bubble</button>
+<button onclick="clearPanels()">Clear All</button>
+<input type="file" id="uploadImage" accept="image/*">
+<button onclick="downloadPanels()">Download All Panels</button>
+</div>
+
+<div id="characters">
+<img src="https://via.placeholder.com/50x50/FF0000/FFFFFF?text=A" alt="Character A" draggable="true">
+<img src="https://via.placeholder.com/50x50/00FF00/FFFFFF?text=B" alt="Character B" draggable="true">
+<img src="https://via.placeholder.com/50x50/0000FF/FFFFFF?text=C" alt="Character C" draggable="true">
+</div>
+
+<div id="comic-container"></div>
 </section>
 </main>
 
 <footer>
-  <p>© 2026 Aaron Wei | <a href="https://github.com/aaronwei2016" style="color:white;">GitHub</a></p>
+<p>© 2026 Aaron Wei | <a href="https://github.com/aaronwei2016" style="color:white;">GitHub</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-  // Navigation
-  function showSection(id) {
-    document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+function showSection(id) {
+  document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Comic Maker
+let panelCount = 0;
+
+function addPanel() {
+  const container = document.getElementById('comic-container');
+  const panel = document.createElement('div');
+  panel.className = 'panel';
+  panel.id = 'panel-' + panelCount;
+  panelCount++;
+  container.appendChild(panel);
+}
+
+function addSpeech() {
+  const panels = document.getElementsByClassName('panel');
+  if (!panels.length) return alert("Add a panel first!");
+
+  const speech = document.createElement('div');
+  speech.className = 'speech';
+  speech.contentEditable = true;
+  speech.innerText = "Type here...";
+  speech.style.left = "10px";
+  speech.style.top = "10px";
+  panels[panels.length-1].appendChild(speech);
+
+  // Make draggable but allow typing
+  speech.addEventListener('mousedown', dragElement);
+}
+
+function clearPanels() {
+  document.getElementById('comic-container').innerHTML = '';
+  panelCount = 0;
+}
+
+// Improved dragging for any element
+function dragElement(e) {
+  const el = e.target;
+  const panel = el.parentElement;
+  if (!panel.classList.contains('panel')) return;
+
+  let startX = e.clientX;
+  let startY = e.clientY;
+  let origX = parseFloat(el.style.left) || 0;
+  let origY = parseFloat(el.style.top) || 0;
+
+  function onMouseMove(e) {
+    let dx = e.clientX - startX;
+    let dy = e.clientY - startY;
+    let newX = Math.min(Math.max(origX + dx, 0), panel.clientWidth - el.offsetWidth);
+    let newY = Math.min(Math.max(origY + dy, 0), panel.clientHeight - el.offsetHeight);
+    el.style.left = newX + 'px';
+    el.style.top = newY + 'px';
   }
 
-  // Comic Maker
-  let panelCount = 0;
-
-  function addPanel() {
-    const container = document.getElementById('comic-container');
-    const panel = document.createElement('div');
-    panel.className = 'panel';
-    panel.id = 'panel-' + panelCount;
-    panelCount++;
-    container.appendChild(panel);
+  function onMouseUp() {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
   }
 
-  function addSpeech() {
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+}
+
+// Drag and resize uploaded images
+const uploadInput = document.getElementById('uploadImage');
+uploadInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
     const panels = document.getElementsByClassName('panel');
     if (!panels.length) return alert("Add a panel first!");
-    
-    const speech = document.createElement('div');
-    speech.className = 'speech';
-    speech.contentEditable = true;
-    speech.innerText = "Type here...";
-    speech.style.left = "10px";
-    speech.style.top = "10px";
-    makeDraggable(speech, panels[panels.length-1]);
-    panels[panels.length-1].appendChild(speech);
-  }
-
-  function clearPanels() {
-    document.getElementById('comic-container').innerHTML = '';
-    panelCount = 0;
-  }
-
-  // Dragging logic for speech and images
-  function makeDraggable(el, container) {
-    el.onmousedown = function(e) {
-      e.preventDefault();
-      let shiftX = e.clientX - el.getBoundingClientRect().left;
-      let shiftY = e.clientY - el.getBoundingClientRect().top;
-
-      function moveAt(pageX, pageY) {
-        let newX = pageX - shiftX - container.getBoundingClientRect().left;
-        let newY = pageY - shiftY - container.getBoundingClientRect().top;
-        // Keep inside panel
-        newX = Math.max(0, Math.min(container.clientWidth - el.offsetWidth, newX));
-        newY = Math.max(0, Math.min(container.clientHeight - el.offsetHeight, newY));
-        el.style.left = newX + 'px';
-        el.style.top = newY + 'px';
-      }
-
-      function onMouseMove(e) { moveAt(e.pageX, e.pageY); }
-      document.addEventListener('mousemove', onMouseMove);
-      el.onmouseup = function() {
-        document.removeEventListener('mousemove', onMouseMove);
-        el.onmouseup = null;
-      };
-    };
-    el.ondragstart = () => false;
-  }
-
-  // Character dragging
-  document.querySelectorAll('#characters img').forEach(img => {
-    img.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/plain', e.target.src);
-    });
-  });
-
-  document.getElementById('comic-container').addEventListener('dragover', e => {
-    e.preventDefault();
-  });
-
-  document.getElementById('comic-container').addEventListener('drop', e => {
-    e.preventDefault();
-    const src = e.dataTransfer.getData('text/plain');
-    const panel = e.target.closest('.panel');
-    if (!panel) return;
     const img = document.createElement('img');
-    img.src = src;
+    img.src = ev.target.result;
     img.className = 'comic-image';
     img.style.width = '80px';
     img.style.height = '80px';
-    img.style.left = (e.offsetX - 40) + 'px';
-    img.style.top = (e.offsetY - 40) + 'px';
-    makeDraggable(img, panel);
-    panel.appendChild(img);
-  });
+    img.style.left = '10px';
+    img.style.top = '10px';
+    panels[panels.length-1].appendChild(img);
+    makeResizable(img, panels[panels.length-1]);
+    img.addEventListener('mousedown', dragElement);
+  };
+  reader.readAsDataURL(file);
+});
 
-  // Download panels
-  function downloadPanels() {
-    const panels = document.querySelectorAll('.panel');
-    panels.forEach((panel, i) => {
-      html2canvas(panel).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'panel-' + i + '.png';
-        link.href = canvas.toDataURL();
-        link.click();
-      });
+// Preloaded character drag
+document.querySelectorAll('#characters img').forEach(img => {
+  img.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', e.target.src));
+});
+
+document.getElementById('comic-container').addEventListener('dragover', e => e.preventDefault());
+document.getElementById('comic-container').addEventListener('drop', e => {
+  e.preventDefault();
+  const src = e.dataTransfer.getData('text/plain');
+  const panel = e.target.closest('.panel');
+  if (!panel) return;
+  const img = document.createElement('img');
+  img.src = src;
+  img.className = 'comic-image';
+  img.style.width = '80px';
+  img.style.height = '80px';
+  img.style.left = (e.offsetX - 40) + 'px';
+  img.style.top = (e.offsetY - 40) + 'px';
+  makeResizable(img, panel);
+  img.addEventListener('mousedown', dragElement);
+  panel.appendChild(img);
+});
+
+// Make images resizable
+function makeResizable(el, container) {
+  const resizer = document.createElement('div');
+  resizer.style.width = '10px';
+  resizer.style.height = '10px';
+  resizer.style.background = '#4CAF50';
+  resizer.style.position = 'absolute';
+  resizer.style.right = 0;
+  resizer.style.bottom = 0;
+  resizer.style.cursor = 'se-resize';
+  el.appendChild(resizer);
+
+  resizer.addEventListener('mousedown', e => {
+    e.stopPropagation();
+    let startX = e.clientX;
+    let startY = e.clientY;
+    let startWidth = el.offsetWidth;
+    let startHeight = el.offsetHeight;
+
+    function onMouseMove(e) {
+      el.style.width = Math.max(20, startWidth + (e.clientX - startX)) + 'px';
+      el.style.height = Math.max(20, startHeight + (e.clientY - startY)) + 'px';
+    }
+
+    function onMouseUp() {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+}
+
+// Download panels as images
+function downloadPanels() {
+  const panels = document.querySelectorAll('.panel');
+  panels.forEach((panel, i) => {
+    html2canvas(panel).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'panel-' + i + '.png';
+      link.href = canvas.toDataURL();
+      link.click();
     });
-  }
+  });
+}
 </script>
 
 </body>
