@@ -3,40 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Comic Maker - TTS Comic</title>
+<title>Mini Comic / Book Maker</title>
 <style>
 body { font-family: Arial, sans-serif; background:#f0f4f8; text-align:center; margin:0; }
 header { background:#4CAF50; color:white; padding:15px; }
 #toolbar { margin:20px 0; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
 #comic-container { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:20px; }
-.panel { width:300px; height:300px; border:2px solid #333; position:relative; cursor:pointer; overflow:hidden; }
+.panel { width:300px; height:300px; border:2px solid #333; position:relative; cursor:pointer; overflow:hidden; background:white; }
 .panel.selected { border:4px solid #FF5722; }
 .panel-bg { position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; background-size:cover; background-position:center; }
 .panel-content { position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; }
-.speech, .comic-image { position:absolute; user-select:none; }
-.speech { background:yellow; padding:5px; border-radius:10px; max-width:280px; z-index:20; cursor:text; }
-.comic-image { z-index:10; cursor:grab; transition: outline 0.1s; }
-.comic-image.hovered, .speech.hovered { outline: 3px solid orange; }
-.resizer { width:10px; height:10px; background:#4CAF50; position:absolute; z-index:25; }
-.resizer.tl { top:-5px; left:-5px; cursor:nwse-resize; }
-.resizer.tr { top:-5px; right:-5px; cursor:nesw-resize; }
-.resizer.bl { bottom:-5px; left:-5px; cursor:nesw-resize; }
-.resizer.br { bottom:-5px; right:-5px; cursor:nwse-resize; }
-.rotator { width:10px; height:10px; background:#FF5722; position:absolute; right:0; top:0; cursor:grab; z-index:26; }
+.speech-wrapper, .image-wrapper { position:absolute; display:inline-block; }
+.speech, .comic-image { display:block; user-select:none; pointer-events:auto; }
+.speech { background:yellow; padding:5px; border-radius:10px; max-width:280px; cursor:text; }
+.hovered { outline:3px solid orange !important; }
+
+/* RESIZE HANDLES */
+.resizer {
+    width:20px; height:20px;
+    background: rgba(76, 175, 80, 0.7);
+    border:2px solid #000;
+    border-radius:50%;
+    position:absolute;
+    z-index:1000;
+}
+.resizer.tl { top:-10px; left:-10px; cursor:nwse-resize; }
+.resizer.tr { top:-10px; right:-10px; cursor:nesw-resize; }
+.resizer.bl { bottom:-10px; left:-10px; cursor:nesw-resize; }
+.resizer.br { bottom:-10px; right:-10px; cursor:nwse-resize; }
+
+/* ROTATOR HANDLE */
+.rotator {
+    width:20px; height:20px;
+    background: rgba(255, 87, 34, 0.7);
+    border:2px solid #000;
+    border-radius:50%;
+    position:absolute;
+    right:-10px;
+    top:-10px;
+    cursor:grab;
+    z-index:1000;
+}
+
 input[type=file] { margin-top:5px; }
 #selected-panel { font-weight:bold; margin-left:10px; }
-.highlight { outline:3px solid orange !important; }
+button { cursor:pointer; padding:5px 10px; margin:2px; }
 </style>
 </head>
 <body>
 
-<header><h1>Mini Comic Maker</h1></header>
+<header><h1>Mini Comic / Book Maker</h1></header>
 
 <div id="toolbar">
   <button onclick="addPanel()">Add Panel</button>
   <button onclick="addSpeech()">Add Speech Bubble</button>
   <button onclick="clearPanels()">Clear All Panels</button>
   <button onclick="downloadPanels()">Download All Panels</button>
+  <button onclick="unlockTTS()">Click to Unlock TTS</button>
   <button onclick="playComicTTS()">Play Comic (TTS)</button>
   <div>
     <label>Selected Panel: <span id="selected-panel">None</span></label>
@@ -57,6 +80,7 @@ input[type=file] { margin-top:5px; }
 <script>
 let panelCount=0;
 let selectedPanel=null;
+let ttsUnlocked=false;
 
 // PANEL FUNCTIONS
 function addPanel(){
@@ -102,13 +126,19 @@ document.addEventListener('click', e=>{
 // SPEECH BUBBLES
 function addSpeech(){
     if(!selectedPanel) return alert("Select a panel first!");
+    const wrapper=document.createElement('div');
+    wrapper.className='speech-wrapper';
+    wrapper.style.left='10px';
+    wrapper.style.top='10px';
+
     const bubble=document.createElement('div');
     bubble.className='speech';
     bubble.contentEditable=true;
     bubble.innerText='Type here...';
-    bubble.style.left='10px'; bubble.style.top='10px';
-    selectedPanel.querySelector('.panel-content').appendChild(bubble);
-    makeDraggableResizable(bubble, selectedPanel.querySelector('.panel-content'), false, true);
+    wrapper.appendChild(bubble);
+    selectedPanel.querySelector('.panel-content').appendChild(wrapper);
+
+    makeDraggableResizable(wrapper, selectedPanel.querySelector('.panel-content'));
 }
 
 // IMAGE UPLOAD
@@ -117,15 +147,22 @@ document.getElementById('uploadImage').addEventListener('change', e=>{
     const file=e.target.files[0]; if(!file) return;
     const reader=new FileReader();
     reader.onload=function(ev){
+        const wrapper=document.createElement('div');
+        wrapper.className='image-wrapper';
+        wrapper.style.left='10px';
+        wrapper.style.top='10px';
+        wrapper.style.width='80px';
+        wrapper.style.height='80px';
+
         const img=document.createElement('img');
         img.src=ev.target.result;
         img.className='comic-image';
-        img.style.width='80px';
-        img.style.height='80px';
-        img.style.left='10px';
-        img.style.top='10px';
-        selectedPanel.querySelector('.panel-content').appendChild(img);
-        makeDraggableResizable(img, selectedPanel.querySelector('.panel-content'), true, false);
+        img.style.width='100%';
+        img.style.height='100%';
+        wrapper.appendChild(img);
+
+        selectedPanel.querySelector('.panel-content').appendChild(wrapper);
+        makeDraggableResizable(wrapper, selectedPanel.querySelector('.panel-content'));
         selectedPanel.classList.add('selected');
         document.getElementById('selected-panel').innerText = selectedPanel.id;
         e.target.value="";
@@ -148,35 +185,32 @@ document.getElementById('uploadBg').addEventListener('change', e=>{
 });
 
 // DRAG, RESIZE, ROTATE
-function makeDraggableResizable(el, container, allowRotation=true, editableBubble=false){
-    el.addEventListener('mouseenter',()=>{ if(selectedPanel && selectedPanel.contains(el)) el.classList.add('hovered'); });
+function makeDraggableResizable(el, container){
+    el.addEventListener('mouseenter',()=>{ el.classList.add('hovered'); });
     el.addEventListener('mouseleave',()=>{ el.classList.remove('hovered'); });
 
-    if(!editableBubble){
-        let offsetX, offsetY, startX, startY;
-        el.onmousedown=function(e){
-            if(e.target.classList.contains('resizer') || e.target.classList.contains('rotator')) return;
-            e.preventDefault();
-            el.classList.add('hovered');
-            startX=e.clientX; startY=e.clientY;
-            offsetX=parseFloat(el.style.left)||0; offsetY=parseFloat(el.style.top)||0;
-            function move(e){
-                let dx=e.clientX-startX, dy=e.clientY-startY;
-                let newX=Math.min(Math.max(offsetX+dx,0),container.clientWidth-el.offsetWidth);
-                let newY=Math.min(Math.max(offsetY+dy,0),container.clientHeight-el.offsetHeight);
-                el.style.left=newX+'px'; el.style.top=newY+'px';
-            }
-            function stop(){
-                document.removeEventListener('mousemove',move);
-                document.removeEventListener('mouseup',stop);
-                el.classList.remove('hovered');
-            }
-            document.addEventListener('mousemove',move);
-            document.addEventListener('mouseup',stop);
-        };
-        el.ondragstart=()=>false;
-    }
+    // DRAG
+    let offsetX, offsetY, startX, startY;
+    el.onmousedown=function(e){
+        if(e.target.classList.contains('resizer') || e.target.classList.contains('rotator')) return;
+        e.preventDefault();
+        startX=e.clientX; startY=e.clientY;
+        offsetX=parseFloat(el.style.left)||0; offsetY=parseFloat(el.style.top)||0;
+        function move(e){
+            let dx=e.clientX-startX, dy=e.clientY-startY;
+            el.style.left=(offsetX+dx)+'px';
+            el.style.top=(offsetY+dy)+'px';
+        }
+        function stop(){
+            document.removeEventListener('mousemove',move);
+            document.removeEventListener('mouseup',stop);
+        }
+        document.addEventListener('mousemove',move);
+        document.addEventListener('mouseup',stop);
+    };
+    el.ondragstart=()=>false;
 
+    // RESIZE
     const corners=['tl','tr','bl','br'];
     corners.forEach(corner=>{
         const resizer=document.createElement('div');
@@ -193,25 +227,26 @@ function makeDraggableResizable(el, container, allowRotation=true, editableBubbl
                 if(corner==='bl'){ newW=startW-dx; newH=startH+dy; newL=startX+dx; }
                 if(corner==='tr'){ newW=startW+dx; newH=startH-dy; newT=startY+dy; }
                 if(corner==='tl'){ newW=startW-dx; newH=startH-dy; newL=startX+dx; newT=startY+dy; }
-                if(newW>20){ el.style.width=newW+'px'; el.style.left=newL+'px'; }
-                if(newH>20){ el.style.height=newH+'px'; el.style.top=newT+'px'; }
+                el.style.width = Math.max(newW,20)+'px';
+                el.style.height = Math.max(newH,20)+'px';
+                el.style.left = newL+'px';
+                el.style.top = newT+'px';
             }
             function stopResize(){document.removeEventListener('mousemove',resize); document.removeEventListener('mouseup',stopResize);}
             document.addEventListener('mousemove',resize); document.addEventListener('mouseup',stopResize);
         });
     });
 
-    if(allowRotation){
-        const rotator=document.createElement('div'); rotator.className='rotator';
-        el.appendChild(rotator);
-        rotator.addEventListener('mousedown', e=>{
-            e.stopPropagation(); e.preventDefault();
-            const rect=el.getBoundingClientRect(), cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
-            function rotate(ev){ const angle=Math.atan2(ev.clientY-cy, ev.clientX-cx)*180/Math.PI; el.style.transform='rotate('+angle+'deg)'; }
-            function stopRotate(){document.removeEventListener('mousemove',rotate); document.removeEventListener('mouseup',stopRotate);}
-            document.addEventListener('mousemove',rotate); document.addEventListener('mouseup',stopRotate);
-        });
-    }
+    // ROTATE
+    const rotator=document.createElement('div'); rotator.className='rotator';
+    el.appendChild(rotator);
+    rotator.addEventListener('mousedown', e=>{
+        e.stopPropagation(); e.preventDefault();
+        const rect=el.getBoundingClientRect(), cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+        function rotate(ev){ const angle=Math.atan2(ev.clientY-cy, ev.clientX-cx)*180/Math.PI; el.style.transform='rotate('+angle+'deg)'; }
+        function stopRotate(){document.removeEventListener('mousemove',rotate); document.removeEventListener('mouseup',stopRotate);}
+        document.addEventListener('mousemove',rotate); document.addEventListener('mouseup',stopRotate);
+    });
 }
 
 // CLEAR & DOWNLOAD
@@ -229,13 +264,21 @@ function downloadPanels(){
     });
 }
 
-// PLAY COMIC WITH TTS & HIGHLIGHT
+// TTS FUNCTIONS
+function unlockTTS(){
+    const utter = new SpeechSynthesisUtterance("TTS unlocked");
+    speechSynthesis.speak(utter);
+    ttsUnlocked = true;
+    alert("TTS unlocked! You can now play the comic with speech.");
+}
+
 async function playComicTTS(){
+    if(!ttsUnlocked){ alert("Click 'Unlock TTS' first!"); return; }
     const panels = Array.from(document.querySelectorAll('.panel'));
     if(panels.length===0) return;
 
     panels.forEach(p=>p.style.display='none');
-    await waitVoices(); // ensure voices loaded
+    await waitVoices();
 
     for(let p of panels){
         p.style.display='block';
@@ -244,16 +287,14 @@ async function playComicTTS(){
 
         for(let b of bubbles){
             b.style.visibility='visible';
-            b.classList.add('highlight');
+            b.classList.add('hovered');
             await speakText(b.innerText);
-            b.classList.remove('highlight');
+            b.classList.remove('hovered');
         }
-        await sleep(300); // short pause between panels
+        await new Promise(r=>setTimeout(r,300));
     }
     panels.forEach(p=>p.style.display='block');
 }
-
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 function waitVoices(){ 
     return new Promise(resolve=>{
@@ -267,7 +308,7 @@ function speakText(text){
     return new Promise(resolve=>{
         const utter = new SpeechSynthesisUtterance(text);
         const voices = speechSynthesis.getVoices();
-        if(voices.length>0) utter.voice=voices[0];
+        if(voices.length>0) utter.voice = voices[0];
         utter.onend = resolve;
         speechSynthesis.speak(utter);
     });
