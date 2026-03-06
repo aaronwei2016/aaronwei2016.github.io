@@ -20,9 +20,10 @@ footer { background:#222; color:white; padding:10px; }
 #toolbar { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:10px; }
 #characters img { width:50px; height:50px; margin:3px; cursor:grab; border:2px solid transparent; }
 #characters img:hover { border-color:#4CAF50; }
-input[type=file] { margin-top:10px; }
+input[type=file] { margin-top:5px; }
 .resizer { width:10px; height:10px; background:#4CAF50; position:absolute; right:0; bottom:0; cursor:se-resize; }
 .rotator { width:10px; height:10px; background:#FF5722; position:absolute; right:0; top:0; cursor:grab; }
+label { font-weight:bold; display:block; margin-top:10px; }
 </style>
 </head>
 <body>
@@ -39,12 +40,18 @@ input[type=file] { margin-top:10px; }
 <button onclick="addPanel()">Add Panel</button>
 <button onclick="addSpeech()">Add Speech Bubble</button>
 <button onclick="clearPanels()">Clear All</button>
-<input type="file" id="uploadImage" accept="image/*">
-<input type="file" id="uploadBg" accept="image/*">
 <button onclick="downloadPanels()">Download All Panels</button>
 </div>
 
-<div id="characters">
+<div style="margin-top:15px;">
+<label for="uploadImage">Upload a Character / Panel Image:</label>
+<input type="file" id="uploadImage" accept="image/*">
+<label for="uploadBg">Upload a Panel Background:</label>
+<input type="file" id="uploadBg" accept="image/*">
+</div>
+
+<div id="characters" style="margin-top:15px;">
+<p><strong>Preloaded Characters:</strong></p>
 <img src="https://via.placeholder.com/50x50/FF0000/FFFFFF?text=A" alt="Character A" draggable="true">
 <img src="https://via.placeholder.com/50x50/00FF00/FFFFFF?text=B" alt="Character B" draggable="true">
 <img src="https://via.placeholder.com/50x50/0000FF/FFFFFF?text=C" alt="Character C" draggable="true">
@@ -107,7 +114,8 @@ function makeDraggable(el, container, allowRotation=true){
       let dy=e.clientY-startY;
       let newX=Math.min(Math.max(offsetX+dx,0),container.clientWidth-el.offsetWidth);
       let newY=Math.min(Math.max(offsetY+dy,0),container.clientHeight-el.offsetHeight);
-      el.style.left=newX+'px'; el.style.top=newY+'px';
+      el.style.left=newX+'px';
+      el.style.top=newY+'px';
     }
     function stop(){document.removeEventListener('mousemove',move); document.removeEventListener('mouseup',stop);}
     document.addEventListener('mousemove',move);
@@ -115,22 +123,18 @@ function makeDraggable(el, container, allowRotation=true){
   };
   el.ondragstart=()=>false;
 
-  // Resizer
+  // Resizer and Rotator
   if(allowRotation){
     const resizer=document.createElement('div'); resizer.className='resizer';
     el.appendChild(resizer);
     resizer.addEventListener('mousedown', e=>{
       e.stopPropagation(); e.preventDefault();
       const startW=el.offsetWidth, startH=el.offsetHeight, sX=e.clientX, sY=e.clientY;
-      function resize(ev){
-        el.style.width=Math.max(20,startW+ev.clientX-sX)+'px';
-        el.style.height=Math.max(20,startH+ev.clientY-sY)+'px';
-      }
+      function resize(ev){ el.style.width=Math.max(20,startW+ev.clientX-sX)+'px'; el.style.height=Math.max(20,startH+ev.clientY-sY)+'px'; }
       function stopResize(){document.removeEventListener('mousemove',resize); document.removeEventListener('mouseup',stopResize);}
       document.addEventListener('mousemove',resize); document.addEventListener('mouseup',stopResize);
     });
 
-    // Rotator
     const rotator=document.createElement('div'); rotator.className='rotator';
     el.appendChild(rotator);
     rotator.addEventListener('mousedown', e=>{
@@ -163,7 +167,7 @@ document.getElementById('comic-container').addEventListener('drop', e=>{
   makeDraggable(img, panel, true);
 });
 
-// Upload your own image
+// Upload Character / Image
 document.getElementById('uploadImage').addEventListener('change', e=>{
   const file=e.target.files[0]; if(!file) return;
   const reader=new FileReader();
@@ -177,7 +181,7 @@ document.getElementById('uploadImage').addEventListener('change', e=>{
   reader.readAsDataURL(file);
 });
 
-// Upload background
+// Upload Panel Background
 document.getElementById('uploadBg').addEventListener('change', e=>{
   const file=e.target.files[0]; if(!file) return;
   const reader=new FileReader();
